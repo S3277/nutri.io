@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
 
-// IMPORTANT: Replace these with your actual Supabase credentials
-const supabaseUrl = 'https://your-project.supabase.co';
-const supabaseKey = 'your-anon-key';
+// Get Supabase credentials from environment variables or use fallback
+const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || 'https://your-project.supabase.co';
+const supabaseKey = Constants.expoConfig?.extra?.supabaseAnonKey || 'your-anon-key';
 
 // Custom storage implementation for React Native
 const ExpoSecureStoreAdapter = {
