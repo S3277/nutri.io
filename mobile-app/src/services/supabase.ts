@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
 
 // Use your actual Supabase credentials
 const supabaseUrl = 'https://vlhvserivyobnhbphvsr.supabase.co';

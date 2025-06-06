@@ -84,6 +84,24 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     );
   };
 
+  const navigateToWorkout = () => {
+    if (navigation) {
+      navigation.navigate('Workout');
+    }
+  };
+
+  const navigateToTrainer = () => {
+    if (navigation) {
+      navigation.navigate('Trainer');
+    }
+  };
+
+  const navigateToProfile = () => {
+    if (navigation) {
+      navigation.navigate('Profile');
+    }
+  };
+
   const totalCalories = foodEntries.reduce((sum, entry) => sum + entry.calories, 0);
   const targetCalories = profile?.target_calories || 2000;
   const calorieProgress = Math.min((totalCalories / targetCalories) * 100, 100);
@@ -111,7 +129,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Header */}
+        {/* Header with Navigation Buttons */}
         <LinearGradient
           colors={['#F97316', '#EA580C']}
           style={styles.header}
@@ -125,6 +143,29 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 {profile?.name || profile?.email?.split('@')[0] || 'User'} 🌟
               </Text>
             </View>
+          </View>
+
+          {/* Navigation Buttons */}
+          <View style={styles.navigationButtons}>
+            <TouchableOpacity style={styles.navButton} onPress={navigateToWorkout}>
+              <Ionicons name="barbell-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.navButtonText}>Workout Log</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.navButton} onPress={navigateToTrainer}>
+              <Ionicons name="fitness-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.navButtonText}>AI Trainer</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.navButton} onPress={navigateToProfile}>
+              <Ionicons name="person-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.navButtonText}>Profile</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.navButton} onPress={handleLogout}>
+              <Ionicons name="log-out-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.navButtonText}>Logout</Text>
+            </TouchableOpacity>
           </View>
         </LinearGradient>
 
@@ -173,7 +214,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               <Ionicons name="add-circle" size={24} color="#F97316" />
               <Text style={styles.actionText}>Add Meal</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity style={styles.actionButton} onPress={navigateToWorkout}>
               <Ionicons name="barbell" size={24} color="#F97316" />
               <Text style={styles.actionText}>Log Workout</Text>
             </TouchableOpacity>
@@ -251,6 +292,28 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginTop: 5,
+  },
+  navigationButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  navButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    alignItems: 'center',
+    minWidth: 70,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  navButtonText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '600',
+    marginTop: 4,
+    textAlign: 'center',
   },
   progressCard: {
     backgroundColor: '#FFFFFF',
