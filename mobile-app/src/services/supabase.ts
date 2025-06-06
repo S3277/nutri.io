@@ -2,9 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 
-// Get Supabase credentials from environment variables or use fallback
-const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || 'https://vlhvserivyobnhbphvsr.supabase.co';
-const supabaseKey = Constants.expoConfig?.extra?.supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsaHZzZXJpdnlvYm5oYnBodnNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY4MjM2NDksImV4cCI6MjA2MjM5OTY0OX0.4mW6A3ZMjRI8BFA0GNlLE9FBE1n2R1cF2DYHEARd6t8';
+// Use your actual Supabase credentials
+const supabaseUrl = 'https://vlhvserivyobnhbphvsr.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsaHZzZXJpdnlvYm5oYnBodnNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY4MjM2NDksImV4cCI6MjA2MjM5OTY0OX0.4mW6A3ZMjRI8BFA0GNlLE9FBE1n2R1cF2DYHEARd6t8';
 
 // Custom storage implementation for React Native
 const ExpoSecureStoreAdapter = {
