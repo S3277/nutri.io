@@ -16,14 +16,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
 import { AuthFormData } from '../types';
 
-interface AuthScreenProps {
-  navigation: any;
-  route: any;
-}
-
-export default function AuthScreen({ navigation, route }: AuthScreenProps) {
-  const initialMode = route?.params?.mode || 'login';
-  const [isLogin, setIsLogin] = useState(initialMode === 'login');
+export default function AuthScreen() {
+  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<AuthFormData>({
     email: '',
@@ -77,10 +71,6 @@ export default function AuthScreen({ navigation, route }: AuthScreenProps) {
     }
   };
 
-  const handleBack = () => {
-    navigation.goBack();
-  };
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -93,14 +83,10 @@ export default function AuthScreen({ navigation, route }: AuthScreenProps) {
         <SafeAreaView style={styles.safeArea}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
             <View style={styles.logoContainer}>
-              <Ionicons name="nutrition" size={40} color="#FFFFFF" />
+              <Ionicons name="nutrition" size={60} color="#FFFFFF" />
               <Text style={styles.logoText}>Nutri.io</Text>
             </View>
-            <View style={{ width: 40 }} />
           </View>
 
           <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -202,29 +188,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingVertical: 40,
   },
   logoContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
   },
   logoText: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginLeft: 8,
+    marginTop: 10,
   },
   scrollContainer: {
     flexGrow: 1,

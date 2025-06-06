@@ -9,7 +9,6 @@ import { supabase } from './src/services/supabase';
 import { UserProfile } from './src/types';
 
 // Screens
-import WelcomeScreen from './src/screens/WelcomeScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import ProfileSetupScreen from './src/screens/ProfileSetupScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
@@ -131,15 +130,12 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           user.height && user.weight && user.age ? (
-            <Stack.Screen name="MainTabs\" component={MainTabs} />
+            <Stack.Screen name="MainTabs" component={MainTabs} />
           ) : (
             <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
           )
         ) : (
-          <>
-            <Stack.Screen name="Welcome" component={WelcomeScreen} />
-            <Stack.Screen name="Auth" component={AuthScreen} />
-          </>
+          <Stack.Screen name="Auth" component={AuthScreen} />
         )}
       </Stack.Navigator>
     </NavigationContainer>
