@@ -4,6 +4,7 @@ import DashboardHeader from '../components/dashboard/DashboardHeader';
 import FoodEntryForm from '../components/dashboard/FoodEntryForm';
 import FoodEntriesList from '../components/dashboard/FoodEntriesList';
 import NutritionSummary from '../components/dashboard/NutritionSummary';
+import QuickActionsPanel from '../components/dashboard/QuickActionsPanel';
 import { supabase } from '../services/supabase';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -24,6 +25,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const [totalCalories, setTotalCalories] = useState(0);
   const [macros, setMacros] = useState({ protein: 0, carbs: 0, fat: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const [showFoodForm, setShowFoodForm] = useState(false);
   
   useEffect(() => {
     const fetchFoodEntries = async () => {
@@ -92,6 +94,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
       if (error) throw error;
       
       setFoodEntries([...foodEntries, data]);
+      setShowFoodForm(false);
     } catch (error) {
       console.error('Error adding food entry:', error);
       throw error;
@@ -112,25 +115,26 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
       console.error('Error deleting food entry:', error);
     }
   };
-  
-  // Calculate BMI
-  const bmi = profile.weight && profile.height 
-    ? Math.round((profile.weight / Math.pow(profile.height / 100, 2)) * 10) / 10
-    : null;
 
-  const getBmiCategory = (bmi: number) => {
-    if (bmi < 18.5) return 'Underweight';
-    if (bmi < 25) return 'Normal weight';
-    if (bmi < 30) return 'Overweight';
-    return 'Obese';
+  const handleScanFood = () => {
+    setShowFoodForm(true);
   };
 
-  const getActivityLevel = (days: number | null) => {
-    if (!days) return 'Sedentary';
-    if (days >= 6) return 'Very Active';
-    if (days >= 3) return 'Moderately Active';
-    if (days >= 1) return 'Lightly Active';
-    return 'Sedentary';
+  const handleAddManualEntry = () => {
+    setShowFoodForm(true);
+  };
+
+  const handleViewAnalytics = () => {
+    // Scroll to nutrition summary or implement analytics modal
+    const analyticsSection = document.getElementById('nutrition-summary');
+    if (analyticsSection) {
+      analyticsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleViewMealPlan = () => {
+    // Implement meal planning functionality
+    console.log('Meal planning feature coming soon!');
   };
   
   if (isLoading) {
@@ -154,62 +158,56 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             macros={macros}
           />
           
+          <QuickActionsPanel
+            onScanFood={handleScanFood}
+            onAddManualEntry={handleAddManualEntry}
+            onViewAnalytics={handleViewAnalytics}
+            onViewMealPlan={handleViewMealPlan}
+          />
+          
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-1 space-y-6">
-              <FoodEntryForm onAddEntry={handleAddEntry} />
+              {showFoodForm && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowFoodForm(false)}
+                    className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow"
+                  >
+                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  <FoodEntryForm onAddEntry={handleAddEntry} />
+                </div>
+              )}
               
               {/* Body Stats Card */}
               <div className="stat-card">
                 <div className="flex items-center mb-4">
                   <h3 className="text-lg font-semibold text-gray-700">Body Stats</h3>
                 </div>
-                {bmi && (
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-sm text-gray-500">BMI</p>
-                      <p className="text-2xl font-bold text-emerald-600">{bmi}</p>
-                      <p className="text-sm text-gray-600">{getBmiCategory(bmi)}</p>
+                {profile.height && profile.weight && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">BMI</span>
+                      <span className="font-semibold">
+                        {Math.round((profile.weight / Math.pow(profile.height / 100, 2)) * 10) / 10}
+                      </span>
                     </div>
-                    <div className="h-1 bg-gray-100 rounded-full">
-                      <div 
-                        className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min((bmi / 30) * 100, 100)}%` }}
-                      />
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Height</span>
+                      <span className="font-semibold">{profile.height} cm</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Weight</span>
+                      <span className="font-semibold">{profile.weight} kg</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Goal</span>
+                      <span className="font-semibold capitalize">{profile.goal}</span>
                     </div>
                   </div>
                 )}
-              </div>
-
-              {/* Activity Level Card */}
-              <div className="stat-card">
-                <div className="flex items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-700">Activity Level</h3>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {getActivityLevel(profile.weekly_activity)}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {profile.weekly_activity || 0} days/week
-                  </p>
-                </div>
-              </div>
-
-              {/* Goal Card */}
-              <div className="stat-card">
-                <div className="flex items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-700">Goal</h3>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-blue-600 capitalize">
-                    {profile.goal || 'Not set'}
-                  </p>
-                  {profile.weight_change !== 0 && profile.weight_change !== null && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      {Math.abs(profile.weight_change)} kg/week
-                    </p>
-                  )}
-                </div>
               </div>
             </div>
             
@@ -219,10 +217,12 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
                 onDeleteEntry={handleDeleteEntry} 
               />
               
-              <NutritionSummary 
-                entries={foodEntries} 
-                dailyCalories={profile.target_calories || 0} 
-              />
+              <div id="nutrition-summary">
+                <NutritionSummary 
+                  entries={foodEntries} 
+                  dailyCalories={profile.target_calories || 0} 
+                />
+              </div>
             </div>
           </div>
         </div>

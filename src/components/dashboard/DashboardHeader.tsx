@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { UserProfile } from '../../types';
-import { ArrowUpRight, ArrowDownRight, Minus, User, Dumbbell, Calendar } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Minus, User, Dumbbell, Calendar, Settings, BarChart3, Camera, Apple } from 'lucide-react';
 import Button from '../ui/Button';
 
 interface DashboardHeaderProps {
@@ -56,42 +56,115 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   return (
     <div className="card p-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {getGreeting()}, <span className="text-emerald-600">{capitalizedName}</span> 🌟
-          </h1>
-          <p className="text-gray-500 mt-1">Track your daily nutrition journey 🥗</p>
-        </div>
+      {/* Top Navigation Bar */}
+      <div className="flex justify-between items-center mb-8 pb-6 border-b border-gray-100">
         <div className="flex items-center space-x-4">
+          <div className="w-12 h-12">
+            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 36C27.9411 36 36 27.9411 36 18C36 8.05887 27.9411 0 18 0C8.05887 0 0 8.05887 0 18C0 27.9411 8.05887 36 18 36Z" fill="url(#paint0_linear)"/>
+              <path d="M27 15C27 19.9706 22.9706 24 18 24C13.0294 24 9 19.9706 9 15C9 10.0294 13.0294 6 18 6C22.9706 6 27 10.0294 27 15Z" fill="white"/>
+              <path d="M22.5 15C22.5 17.4853 20.4853 19.5 18 19.5C15.5147 19.5 13.5 17.4853 13.5 15C13.5 12.5147 15.5147 10.5 18 10.5C20.4853 10.5 22.5 12.5147 22.5 15Z" fill="url(#paint1_linear)"/>
+              <defs>
+                <linearGradient id="paint0_linear" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#F97316"/>
+                  <stop offset="1" stopColor="#EA580C"/>
+                </linearGradient>
+                <linearGradient id="paint1_linear" x1="13.5" y1="10.5" x2="22.5" y2="19.5" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#F97316"/>
+                  <stop offset="1" stopColor="#EA580C"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+              Nutri.io
+            </h1>
+            <p className="text-sm text-gray-500">Smart Nutrition Tracking</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-2">
           <Button
             variant="outline"
-            onClick={() => window.location.href = '/workout-agenda'}
-            leftIcon={<Calendar size={18} />}
-          >
-            Workout Log
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onViewTrainer}
-            leftIcon={<Dumbbell size={18} />}
-          >
-            AI Trainer
-          </Button>
-          <Button
-            variant="outline"
+            size="sm"
             onClick={onViewProfile}
-            leftIcon={<User size={18} />}
+            leftIcon={<User size={16} />}
           >
             Profile
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={onLogout}
+            leftIcon={<Settings size={16} />}
           >
-            Logout
+            Settings
           </Button>
         </div>
+      </div>
+
+      {/* Main Navigation Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <button
+          onClick={() => window.location.href = '/workout-agenda'}
+          className="nav-card group"
+        >
+          <div className="flex flex-col items-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:border-blue-300 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+              <Calendar size={24} className="text-white" />
+            </div>
+            <h3 className="font-semibold text-blue-700 mb-1">Workout Log</h3>
+            <p className="text-xs text-blue-600 text-center">Track exercises & progress</p>
+          </div>
+        </button>
+
+        <button
+          onClick={onViewTrainer}
+          className="nav-card group"
+        >
+          <div className="flex flex-col items-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:border-purple-300 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+            <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+              <Dumbbell size={24} className="text-white" />
+            </div>
+            <h3 className="font-semibold text-purple-700 mb-1">AI Trainer</h3>
+            <p className="text-xs text-purple-600 text-center">Body analysis & plans</p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => {/* Add food scanning functionality */}}
+          className="nav-card group"
+        >
+          <div className="flex flex-col items-center p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200 hover:border-emerald-300 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+            <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+              <Camera size={24} className="text-white" />
+            </div>
+            <h3 className="font-semibold text-emerald-700 mb-1">Scan Food</h3>
+            <p className="text-xs text-emerald-600 text-center">AI food recognition</p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => {/* Add nutrition insights functionality */}}
+          className="nav-card group"
+        >
+          <div className="flex flex-col items-center p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200 hover:border-orange-300 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+            <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+              <BarChart3 size={24} className="text-white" />
+            </div>
+            <h3 className="font-semibold text-orange-700 mb-1">Analytics</h3>
+            <p className="text-xs text-orange-600 text-center">Progress insights</p>
+          </div>
+        </button>
+      </div>
+
+      {/* Greeting Section */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">
+          {getGreeting()}, <span className="text-emerald-600">{capitalizedName}</span> 🌟
+        </h1>
+        <p className="text-gray-500 mt-1">Track your daily nutrition journey 🥗</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
