@@ -9,6 +9,7 @@ import { supabase } from './src/services/supabase';
 import { UserProfile } from './src/types';
 
 // Screens
+import WelcomeScreen from './src/screens/WelcomeScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import ProfileSetupScreen from './src/screens/ProfileSetupScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
@@ -69,6 +70,7 @@ function MainTabs() {
 export default function App() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -86,6 +88,7 @@ export default function App() {
             setUser(null);
           } else if (profile) {
             setUser(profile);
+            setShowWelcome(false); // Skip welcome if user is already logged in
           } else {
             setUser(null);
           }
@@ -112,8 +115,10 @@ export default function App() {
           .maybeSingle();
         
         setUser(profile);
+        setShowWelcome(false);
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
+        setShowWelcome(true);
       }
     });
 
@@ -130,10 +135,20 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           user.height && user.weight && user.age ? (
-            <Stack.Screen name="MainTabs\" component={MainTabs} />
+            <Stack.Screen name="MainTabs" component={MainTabs} />
           ) : (
             <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
           )
+        ) : showWelcome ? (
+          <>
+            <Stack.Screen 
+              name="Welcome" 
+              component={WelcomeScreen} 
+              initialParams={{ onContinue: () => setShowWelcome(false) }}
+            />
+            <Stack.Screen name="Auth" component={AuthScreen} />
+            <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+          </>
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} />
         )}

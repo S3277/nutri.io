@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  ImageBackground,
+  Animated,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,36 +16,94 @@ const { width, height } = Dimensions.get('window');
 
 interface WelcomeScreenProps {
   navigation: any;
+  route: any;
 }
 
-export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
-  const handleLogin = () => {
-    navigation.navigate('Auth', { mode: 'login' });
+export default function WelcomeScreen({ navigation, route }: WelcomeScreenProps) {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  useEffect(() => {
+    // Animate elements on mount
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const handleGetStarted = () => {
+    navigation.navigate('Auth');
   };
 
-  const handleSignUp = () => {
-    navigation.navigate('Auth', { mode: 'signup' });
+  const handleSkip = () => {
+    navigation.navigate('Auth');
   };
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#F97316" />
+      
       {/* Background with gradient overlay */}
       <LinearGradient
-        colors={['rgba(249, 115, 22, 0.9)', 'rgba(234, 88, 12, 0.9)']}
+        colors={['#F97316', '#EA580C', '#DC2626']}
         style={styles.gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       >
         <SafeAreaView style={styles.safeArea}>
+          {/* Skip Button */}
+          <View style={styles.topBar}>
+            <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
+              <Text style={styles.skipText}>Skip</Text>
+            </TouchableOpacity>
+          </View>
+
           {/* Logo and App Name */}
-          <View style={styles.logoSection}>
+          <Animated.View 
+            style={[
+              styles.logoSection,
+              {
+                opacity: fadeAnim,
+                transform: [
+                  { translateY: slideAnim },
+                  { scale: scaleAnim }
+                ]
+              }
+            ]}
+          >
             <View style={styles.logoContainer}>
-              <Ionicons name="nutrition" size={80} color="#FFFFFF" />
+              <View style={styles.logoBackground}>
+                <Ionicons name="nutrition" size={60} color="#F97316" />
+              </View>
             </View>
             <Text style={styles.appName}>Nutri.io</Text>
             <Text style={styles.tagline}>Smart Nutrition Tracking</Text>
-          </View>
+          </Animated.View>
 
           {/* Main Content */}
-          <View style={styles.contentSection}>
+          <Animated.View 
+            style={[
+              styles.contentSection,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
             <View style={styles.heroContent}>
               <Text style={styles.heroTitle}>
                 Transform Your{'\n'}
@@ -57,35 +116,74 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
 
             {/* Features Preview */}
             <View style={styles.featuresContainer}>
-              <View style={styles.featureItem}>
-                <Ionicons name="camera" size={24} color="#FFFFFF" />
+              <Animated.View 
+                style={[
+                  styles.featureItem,
+                  {
+                    opacity: fadeAnim,
+                    transform: [{ scale: scaleAnim }]
+                  }
+                ]}
+              >
+                <View style={styles.featureIconContainer}>
+                  <Ionicons name="camera" size={24} color="#F97316" />
+                </View>
                 <Text style={styles.featureText}>Snap & Track</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Ionicons name="analytics" size={24} color="#FFFFFF" />
+                <Text style={styles.featureSubtext}>AI food recognition</Text>
+              </Animated.View>
+
+              <Animated.View 
+                style={[
+                  styles.featureItem,
+                  {
+                    opacity: fadeAnim,
+                    transform: [{ scale: scaleAnim }]
+                  }
+                ]}
+              >
+                <View style={styles.featureIconContainer}>
+                  <Ionicons name="analytics" size={24} color="#F97316" />
+                </View>
                 <Text style={styles.featureText}>Smart Analytics</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Ionicons name="fitness" size={24} color="#FFFFFF" />
+                <Text style={styles.featureSubtext}>Progress insights</Text>
+              </Animated.View>
+
+              <Animated.View 
+                style={[
+                  styles.featureItem,
+                  {
+                    opacity: fadeAnim,
+                    transform: [{ scale: scaleAnim }]
+                  }
+                ]}
+              >
+                <View style={styles.featureIconContainer}>
+                  <Ionicons name="fitness" size={24} color="#F97316" />
+                </View>
                 <Text style={styles.featureText}>AI Trainer</Text>
-              </View>
+                <Text style={styles.featureSubtext}>Personal coaching</Text>
+              </Animated.View>
             </View>
-          </View>
+          </Animated.View>
 
           {/* Action Buttons */}
-          <View style={styles.actionSection}>
-            <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+          <Animated.View 
+            style={[
+              styles.actionSection,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
+            <TouchableOpacity style={styles.getStartedButton} onPress={handleGetStarted}>
               <LinearGradient
                 colors={['#FFFFFF', '#F8F8F8']}
                 style={styles.buttonGradient}
               >
-                <Text style={styles.signUpButtonText}>Get Started</Text>
+                <Text style={styles.getStartedButtonText}>Get Started</Text>
                 <Ionicons name="arrow-forward" size={20} color="#F97316" />
               </LinearGradient>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <Text style={styles.loginButtonText}>Already have an account? Sign In</Text>
             </TouchableOpacity>
 
             {/* Social Proof */}
@@ -107,13 +205,44 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
                 </View>
               </View>
             </View>
-          </View>
+
+            <Text style={styles.bottomText}>
+              Join thousands of users transforming their health
+            </Text>
+          </Animated.View>
 
           {/* Floating Elements */}
           <View style={styles.floatingElements}>
-            <View style={[styles.floatingCircle, styles.circle1]} />
-            <View style={[styles.floatingCircle, styles.circle2]} />
-            <View style={[styles.floatingCircle, styles.circle3]} />
+            <Animated.View 
+              style={[
+                styles.floatingCircle, 
+                styles.circle1,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ scale: scaleAnim }]
+                }
+              ]} 
+            />
+            <Animated.View 
+              style={[
+                styles.floatingCircle, 
+                styles.circle2,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ scale: scaleAnim }]
+                }
+              ]} 
+            />
+            <Animated.View 
+              style={[
+                styles.floatingCircle, 
+                styles.circle3,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ scale: scaleAnim }]
+                }
+              ]} 
+            />
           </View>
         </SafeAreaView>
       </LinearGradient>
@@ -132,19 +261,37 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
-  logoSection: {
-    alignItems: 'center',
-    paddingTop: 40,
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingTop: 10,
     paddingBottom: 20,
   },
+  skipButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 20,
+  },
+  skipText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  logoSection: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
   logoContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    marginBottom: 20,
+  },
+  logoBackground: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
@@ -152,7 +299,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   appName: {
-    fontSize: 42,
+    fontSize: 36,
     fontWeight: 'bold',
     color: '#FFFFFF',
     letterSpacing: -1,
@@ -169,19 +316,18 @@ const styles = StyleSheet.create({
   contentSection: {
     flex: 1,
     justifyContent: 'center',
-    paddingVertical: 40,
   },
   heroContent: {
     alignItems: 'center',
     marginBottom: 40,
   },
   heroTitle: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#FFFFFF',
     textAlign: 'center',
-    lineHeight: 42,
-    marginBottom: 20,
+    lineHeight: 38,
+    marginBottom: 16,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
@@ -190,38 +336,54 @@ const styles = StyleSheet.create({
     color: '#FFF3CD',
   },
   heroSubtitle: {
-    fontSize: 18,
+    fontSize: 16,
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
-    lineHeight: 26,
+    lineHeight: 24,
     paddingHorizontal: 20,
     fontWeight: '400',
   },
   featuresContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
   },
   featureItem: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 16,
-    minWidth: 90,
+    flex: 1,
+    paddingHorizontal: 8,
+  },
+  featureIconContainer: {
+    width: 60,
+    height: 60,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   featureText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '600',
-    marginTop: 8,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  featureSubtext: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 12,
     textAlign: 'center',
   },
   actionSection: {
     paddingBottom: 40,
   },
-  signUpButton: {
-    marginBottom: 16,
+  getStartedButton: {
+    marginBottom: 24,
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -237,29 +399,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     borderRadius: 16,
   },
-  signUpButtonText: {
+  getStartedButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#F97316',
     marginRight: 8,
   },
-  loginButton: {
-    alignItems: 'center',
-    paddingVertical: 16,
-  },
-  loginButtonText: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontWeight: '500',
-  },
   socialProof: {
-    marginTop: 32,
     alignItems: 'center',
+    marginBottom: 16,
   },
   statsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 20,
@@ -271,12 +424,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   statNumber: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: 'rgba(255, 255, 255, 0.8)',
     marginTop: 2,
   },
@@ -284,6 +437,12 @@ const styles = StyleSheet.create({
     width: 1,
     height: 30,
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  bottomText: {
+    textAlign: 'center',
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
+    fontWeight: '500',
   },
   floatingElements: {
     position: 'absolute',
@@ -299,21 +458,21 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   circle1: {
-    width: 100,
-    height: 100,
-    top: '15%',
-    right: -50,
+    width: 80,
+    height: 80,
+    top: '20%',
+    right: -40,
   },
   circle2: {
     width: 60,
     height: 60,
-    top: '45%',
+    top: '50%',
     left: -30,
   },
   circle3: {
-    width: 80,
-    height: 80,
-    bottom: '20%',
-    right: -40,
+    width: 100,
+    height: 100,
+    bottom: '25%',
+    right: -50,
   },
 });
