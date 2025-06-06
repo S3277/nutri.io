@@ -499,13 +499,9 @@ const WorkoutAgendaPage: React.FC = () => {
               <div className="text-center py-12 bg-gray-50 rounded-xl">
                 <Dumbbell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600">No workouts logged for this day</p>
-                <Button
-                  onClick={() => setShowAddForm(true)}
-                  className="mt-4"
-                  leftIcon={<Plus size={18} />}
-                >
-                  Add Your First Exercise
-                </Button>
+                <p className="text-sm text-gray-500 mt-2">
+                  Click "Add Exercise" above to start tracking your workout
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
