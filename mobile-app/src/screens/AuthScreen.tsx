@@ -10,13 +10,20 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
 import { AuthFormData } from '../types';
 
-export default function AuthScreen() {
-  const [isLogin, setIsLogin] = useState(true);
+interface AuthScreenProps {
+  navigation: any;
+  route: any;
+}
+
+export default function AuthScreen({ navigation, route }: AuthScreenProps) {
+  const initialMode = route?.params?.mode || 'login';
+  const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<AuthFormData>({
     email: '',
@@ -70,6 +77,10 @@ export default function AuthScreen() {
     }
   };
 
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -79,77 +90,102 @@ export default function AuthScreen() {
         colors={['#F97316', '#EA580C']}
         style={styles.gradient}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.logoContainer}>
-            <Ionicons name="nutrition" size={80} color="#FFFFFF" />
-            <Text style={styles.logoText}>Nutri.io</Text>
-            <Text style={styles.subtitle}>Smart Nutrition Tracking</Text>
+        <SafeAreaView style={styles.safeArea}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+            <View style={styles.logoContainer}>
+              <Ionicons name="nutrition" size={40} color="#FFFFFF" />
+              <Text style={styles.logoText}>Nutri.io</Text>
+            </View>
+            <View style={{ width: 40 }} />
           </View>
 
-          <View style={styles.formContainer}>
-            <Text style={styles.title}>
-              {isLogin ? 'Welcome Back' : 'Create Account'}
-            </Text>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.formContainer}>
+              <Text style={styles.title}>
+                {isLogin ? 'Welcome Back!' : 'Join Nutri.io'}
+              </Text>
+              <Text style={styles.subtitle}>
+                {isLogin 
+                  ? 'Sign in to continue your health journey' 
+                  : 'Start your personalized nutrition journey today'
+                }
+              </Text>
 
-            {!isLogin && (
+              {!isLogin && (
+                <View style={styles.inputContainer}>
+                  <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Your name"
+                    value={formData.name}
+                    onChangeText={(text) => setFormData({ ...formData, name: text })}
+                    autoCapitalize="words"
+                    placeholderTextColor="#999"
+                  />
+                </View>
+              )}
+
               <View style={styles.inputContainer}>
-                <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
+                <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Your name"
-                  value={formData.name}
-                  onChangeText={(text) => setFormData({ ...formData, name: text })}
-                  autoCapitalize="words"
+                  placeholder="Email address"
+                  value={formData.email}
+                  onChangeText={(text) => setFormData({ ...formData, email: text })}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  placeholderTextColor="#999"
                 />
               </View>
-            )}
 
-            <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Email address"
-                value={formData.email}
-                onChangeText={(text) => setFormData({ ...formData, email: text })}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
+              <View style={styles.inputContainer}>
+                <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  value={formData.password}
+                  onChangeText={(text) => setFormData({ ...formData, password: text })}
+                  secureTextEntry
+                  placeholderTextColor="#999"
+                />
+              </View>
 
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                value={formData.password}
-                onChangeText={(text) => setFormData({ ...formData, password: text })}
-                secureTextEntry
-              />
-            </View>
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleAuth}
+                disabled={loading}
+              >
+                <LinearGradient
+                  colors={loading ? ['#CCC', '#AAA'] : ['#F97316', '#EA580C']}
+                  style={styles.buttonGradient}
+                >
+                  <Text style={styles.buttonText}>
+                    {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
+                  </Text>
+                  {!loading && (
+                    <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleAuth}
-              disabled={loading}
-            >
-              <Text style={styles.buttonText}>
-                {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Sign Up'}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.switchButton}
-              onPress={() => setIsLogin(!isLogin)}
-            >
-              <Text style={styles.switchText}>
-                {isLogin ? "Don't have an account? " : 'Already have an account? '}
-                <Text style={styles.switchTextBold}>
-                  {isLogin ? 'Sign Up' : 'Sign In'}
+              <TouchableOpacity
+                style={styles.switchButton}
+                onPress={() => setIsLogin(!isLogin)}
+              >
+                <Text style={styles.switchText}>
+                  {isLogin ? "Don't have an account? " : 'Already have an account? '}
+                  <Text style={styles.switchTextBold}>
+                    {isLogin ? 'Sign Up' : 'Sign In'}
+                  </Text>
                 </Text>
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
       </LinearGradient>
     </KeyboardAvoidingView>
   );
@@ -162,89 +198,121 @@ const styles = StyleSheet.create({
   gradient: {
     flex: 1,
   },
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginLeft: 8,
+  },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
     padding: 20,
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  logoText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginTop: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    opacity: 0.9,
-    marginTop: 5,
-  },
   formContainer: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 30,
+    borderRadius: 24,
+    padding: 32,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 8,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 12,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 22,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E5E5',
-    borderRadius: 12,
-    marginBottom: 15,
-    paddingHorizontal: 15,
-    backgroundColor: '#F9F9F9',
+    borderWidth: 2,
+    borderColor: '#F0F0F0',
+    borderRadius: 16,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    backgroundColor: '#FAFAFA',
+    height: 56,
   },
   inputIcon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   input: {
     flex: 1,
-    height: 50,
     fontSize: 16,
     color: '#333',
   },
   button: {
-    backgroundColor: '#F97316',
-    borderRadius: 12,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
+    borderRadius: 16,
+    marginTop: 8,
+    marginBottom: 24,
+    shadowColor: '#F97316',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   buttonDisabled: {
-    opacity: 0.6,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  buttonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 56,
+    borderRadius: 16,
   },
   buttonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
+    marginRight: 8,
   },
   switchButton: {
-    marginTop: 20,
     alignItems: 'center',
   },
   switchText: {
     color: '#666',
-    fontSize: 14,
+    fontSize: 16,
   },
   switchTextBold: {
     color: '#F97316',

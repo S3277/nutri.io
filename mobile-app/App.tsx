@@ -9,6 +9,7 @@ import { supabase } from './src/services/supabase';
 import { UserProfile } from './src/types';
 
 // Screens
+import WelcomeScreen from './src/screens/WelcomeScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import ProfileSetupScreen from './src/screens/ProfileSetupScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
@@ -44,6 +45,18 @@ function MainTabs() {
         tabBarActiveTintColor: '#F97316',
         tabBarInactiveTintColor: 'gray',
         headerShown: false,
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: '#E5E5E5',
+          paddingBottom: 8,
+          paddingTop: 8,
+          height: 88,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
       })}
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
@@ -89,6 +102,23 @@ export default function App() {
     };
 
     checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .maybeSingle();
+        
+        setUser(profile);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   if (loading) {
@@ -97,16 +127,19 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           user.height && user.weight && user.age ? (
-            <Stack.Screen name="MainTabs\" component={MainTabs} />
+            <Stack.Screen name="MainTabs" component={MainTabs} />
           ) : (
             <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
           )
         ) : (
-          <Stack.Screen name="Auth" component={AuthScreen} />
+          <>
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="Auth" component={AuthScreen} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
