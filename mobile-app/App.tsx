@@ -131,7 +131,7 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           user.height && user.weight && user.age ? (
-            <Stack.Screen name="MainTabs" component={MainTabs} />
+            <Stack.Screen name="MainTabs\" component={MainTabs} />
           ) : (
             <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
           )
