@@ -1,6 +1,5 @@
 import React from 'react';
-import { Camera, Plus, BarChart3, Apple, Utensils, Target, TrendingUp, Calendar } from 'lucide-react';
-import Button from '../ui/Button';
+import { Camera, Plus, BarChart3, Target, TrendingUp, Calendar } from 'lucide-react';
 
 interface QuickActionsPanelProps {
   onScanFood: () => void;
@@ -13,7 +12,6 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
   onScanFood,
   onAddManualEntry,
   onViewAnalytics,
-  onViewMealPlan,
 }) => {
   const quickActions = [
     {
@@ -40,14 +38,6 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
       color: 'purple',
       onClick: onViewAnalytics,
     },
-    {
-      id: 'meal-plan',
-      title: 'Meal Planning',
-      description: 'Plan your meals',
-      icon: <Utensils size={24} />,
-      color: 'orange',
-      onClick: onViewMealPlan,
-    },
   ];
 
   const getColorClasses = (color: string) => {
@@ -73,13 +63,6 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
         text: 'text-purple-700',
         desc: 'text-purple-600',
       },
-      orange: {
-        bg: 'bg-orange-50',
-        border: 'border-orange-200 hover:border-orange-300',
-        icon: 'bg-orange-500',
-        text: 'text-orange-700',
-        desc: 'text-orange-600',
-      },
     };
     return colorMap[color as keyof typeof colorMap] || colorMap.emerald;
   };
@@ -94,7 +77,7 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {quickActions.map((action) => {
           const colors = getColorClasses(action.color);
           return (

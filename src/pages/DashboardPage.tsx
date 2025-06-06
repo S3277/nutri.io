@@ -5,6 +5,7 @@ import FoodEntryForm from '../components/dashboard/FoodEntryForm';
 import FoodEntriesList from '../components/dashboard/FoodEntriesList';
 import NutritionSummary from '../components/dashboard/NutritionSummary';
 import QuickActionsPanel from '../components/dashboard/QuickActionsPanel';
+import ManualFoodEntryForm from '../components/dashboard/ManualFoodEntryForm';
 import { supabase } from '../services/supabase';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -26,6 +27,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const [macros, setMacros] = useState({ protein: 0, carbs: 0, fat: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [showFoodForm, setShowFoodForm] = useState(false);
+  const [showManualForm, setShowManualForm] = useState(false);
   
   useEffect(() => {
     const fetchFoodEntries = async () => {
@@ -95,6 +97,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
       
       setFoodEntries([...foodEntries, data]);
       setShowFoodForm(false);
+      setShowManualForm(false);
     } catch (error) {
       console.error('Error adding food entry:', error);
       throw error;
@@ -118,10 +121,12 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
 
   const handleScanFood = () => {
     setShowFoodForm(true);
+    setShowManualForm(false);
   };
 
   const handleAddManualEntry = () => {
-    setShowFoodForm(true);
+    setShowManualForm(true);
+    setShowFoodForm(false);
   };
 
   const handleViewAnalytics = () => {
@@ -132,9 +137,9 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     }
   };
 
-  const handleViewMealPlan = () => {
-    // Implement meal planning functionality
-    console.log('Meal planning feature coming soon!');
+  const handleCloseAllForms = () => {
+    setShowFoodForm(false);
+    setShowManualForm(false);
   };
   
   if (isLoading) {
@@ -162,7 +167,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             onScanFood={handleScanFood}
             onAddManualEntry={handleAddManualEntry}
             onViewAnalytics={handleViewAnalytics}
-            onViewMealPlan={handleViewMealPlan}
+            onViewMealPlan={() => {}}
           />
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -170,7 +175,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
               {showFoodForm && (
                 <div className="relative">
                   <button
-                    onClick={() => setShowFoodForm(false)}
+                    onClick={handleCloseAllForms}
                     className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow"
                   >
                     <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,6 +184,13 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
                   </button>
                   <FoodEntryForm onAddEntry={handleAddEntry} />
                 </div>
+              )}
+
+              {showManualForm && (
+                <ManualFoodEntryForm 
+                  onSubmit={handleAddEntry}
+                  onCancel={handleCloseAllForms}
+                />
               )}
               
               {/* Body Stats Card */}

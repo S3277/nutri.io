@@ -97,6 +97,12 @@ const WorkoutAgendaPage: React.FC = () => {
   const [savedWorkouts, setSavedWorkouts] = useState<SavedWorkout[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newExercise, setNewExercise] = useState({
+    name: '',
+    type: 'strength' as 'strength' | 'cardio',
+    sets: [{ weight: 0, reps: 0 }]
+  });
 
   useEffect(() => {
     fetchWorkouts();
@@ -171,6 +177,79 @@ const WorkoutAgendaPage: React.FC = () => {
     setSelectedDate(date.toISOString().split('T')[0]);
   };
 
+  const handleAddExercise = async () => {
+    if (!newExercise.name.trim()) {
+      alert('Please enter an exercise name');
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('workout_entries')
+        .insert({
+          user_id: user.id,
+          exercise_name: newExercise.name,
+          sets: newExercise.sets,
+          type: newExercise.type,
+          date: selectedDate,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setEntries([...entries, data]);
+      setNewExercise({
+        name: '',
+        type: 'strength',
+        sets: [{ weight: 0, reps: 0 }]
+      });
+      setShowAddForm(false);
+    } catch (error) {
+      console.error('Error adding exercise:', error);
+      alert('Failed to add exercise. Please try again.');
+    }
+  };
+
+  const handleDeleteEntry = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('workout_entries')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setEntries(entries.filter(entry => entry.id !== id));
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      alert('Failed to delete entry. Please try again.');
+    }
+  };
+
+  const addSet = () => {
+    setNewExercise({
+      ...newExercise,
+      sets: [...newExercise.sets, { weight: 0, reps: 0 }]
+    });
+  };
+
+  const updateSet = (index: number, field: 'weight' | 'reps', value: number) => {
+    const updatedSets = [...newExercise.sets];
+    updatedSets[index] = { ...updatedSets[index], [field]: value };
+    setNewExercise({ ...newExercise, sets: updatedSets });
+  };
+
+  const removeSet = (index: number) => {
+    if (newExercise.sets.length > 1) {
+      const updatedSets = newExercise.sets.filter((_, i) => i !== index);
+      setNewExercise({ ...newExercise, sets: updatedSets });
+    }
+  };
+
   const getStrengthLevel = () => {
     let level = STRENGTH_LEVELS[0];
     for (const strengthLevel of STRENGTH_LEVELS) {
@@ -192,26 +271,30 @@ const WorkoutAgendaPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm py-4">
         <div className="container mx-auto px-4">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="text-gray-600 hover:text-gray-800 font-medium flex items-center"
-          >
-            <ArrowLeft size={20} className="mr-2" />
-            Back to Dashboard
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="text-gray-600 hover:text-gray-800 font-medium flex items-center"
+            >
+              <ArrowLeft size={20} className="mr-2" />
+              Back to Dashboard
+            </button>
+            <h1 className="text-xl font-bold text-gray-900">Workout Log</h1>
+            <div className="w-24"></div>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-8">
           {/* Level and XP Progress */}
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 space-y-4 md:space-y-0">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Level {level}</h2>
                 <p className="text-gray-600">{getLevelTitle(level)}</p>
               </div>
-              <div className="text-right">
+              <div className="text-left md:text-right">
                 <p className="text-sm text-gray-500">Total XP</p>
                 <p className="text-xl font-bold text-orange-600">{totalXP.toLocaleString()}</p>
               </div>
@@ -240,15 +323,15 @@ const WorkoutAgendaPage: React.FC = () => {
           </div>
 
           {/* Strength Level */}
-          <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Strength Level</h2>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0">
               <div>
                 <p className="text-4xl mb-2">{strengthLevel.emoji}</p>
                 <p className="text-lg font-medium text-gray-900">{strengthLevel.name}</p>
                 <p className="text-sm text-gray-600">{strengthLevel.description}</p>
               </div>
-              <div className="text-right">
+              <div className="text-left md:text-right">
                 <p className="text-sm text-gray-500">Total Volume</p>
                 <p className="text-2xl font-bold text-orange-600">{totalWeight.toLocaleString()} kg</p>
                 {totalWeight < strengthLevel.strength && (
@@ -273,29 +356,140 @@ const WorkoutAgendaPage: React.FC = () => {
           </div>
 
           {/* Workout Log */}
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 space-y-4 lg:space-y-0">
               <h2 className="text-xl font-bold text-gray-900">Workout Log</h2>
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full lg:w-auto">
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDateChange('prev')}
+                    leftIcon={<ChevronLeft size={16} />}
+                    className="px-3 py-2"
+                  >
+                    <span className="hidden sm:inline">Previous</span>
+                  </Button>
+                  <span className="text-gray-600 font-medium text-sm px-2">
+                    {new Date(selectedDate).toLocaleDateString()}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDateChange('next')}
+                    rightIcon={<ChevronRight size={16} />}
+                    className="px-3 py-2"
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                  </Button>
+                </div>
                 <Button
-                  variant="outline"
-                  onClick={() => handleDateChange('prev')}
-                  leftIcon={<ChevronLeft size={18} />}
+                  onClick={() => setShowAddForm(true)}
+                  leftIcon={<Plus size={16} />}
+                  size="sm"
+                  className="w-full sm:w-auto"
                 >
-                  Previous
-                </Button>
-                <span className="text-gray-600 font-medium">
-                  {new Date(selectedDate).toLocaleDateString()}
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={() => handleDateChange('next')}
-                  rightIcon={<ChevronRight size={18} />}
-                >
-                  Next
+                  Add Exercise
                 </Button>
               </div>
             </div>
+
+            {/* Add Exercise Form */}
+            {showAddForm && (
+              <div className="mb-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Add New Exercise</h3>
+                  <button
+                    onClick={() => setShowAddForm(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      label="Exercise Name"
+                      value={newExercise.name}
+                      onChange={(e) => setNewExercise({ ...newExercise, name: e.target.value })}
+                      placeholder="e.g., Bench Press"
+                    />
+                    <Select
+                      label="Type"
+                      value={newExercise.type}
+                      onChange={(value) => setNewExercise({ ...newExercise, type: value as 'strength' | 'cardio' })}
+                      options={[
+                        { value: 'strength', label: 'Strength Training' },
+                        { value: 'cardio', label: 'Cardio' }
+                      ]}
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-sm font-medium text-gray-700">Sets</label>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={addSet}
+                        leftIcon={<Plus size={14} />}
+                      >
+                        Add Set
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {newExercise.sets.map((set, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <span className="text-sm text-gray-500 w-12">Set {index + 1}:</span>
+                          <Input
+                            type="number"
+                            placeholder="Weight (kg)"
+                            value={set.weight || ''}
+                            onChange={(e) => updateSet(index, 'weight', Number(e.target.value))}
+                            className="flex-1"
+                          />
+                          <span className="text-gray-400">×</span>
+                          <Input
+                            type="number"
+                            placeholder="Reps"
+                            value={set.reps || ''}
+                            onChange={(e) => updateSet(index, 'reps', Number(e.target.value))}
+                            className="flex-1"
+                          />
+                          {newExercise.sets.length > 1 && (
+                            <button
+                              onClick={() => removeSet(index)}
+                              className="text-red-500 hover:text-red-700 p-1"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAddForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleAddExercise}
+                      leftIcon={<Save size={16} />}
+                    >
+                      Save Exercise
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {isLoading ? (
               <div className="flex justify-center items-center py-12">
@@ -306,11 +500,11 @@ const WorkoutAgendaPage: React.FC = () => {
                 <Dumbbell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600">No workouts logged for this day</p>
                 <Button
-                  onClick={() => {/* Add new workout entry */}}
+                  onClick={() => setShowAddForm(true)}
                   className="mt-4"
                   leftIcon={<Plus size={18} />}
                 >
-                  Add Workout
+                  Add Your First Exercise
                 </Button>
               </div>
             ) : (
@@ -321,7 +515,7 @@ const WorkoutAgendaPage: React.FC = () => {
                     className="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-shadow"
                   >
                     <div className="flex justify-between items-start">
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-medium text-gray-900">{entry.exercise_name}</h3>
                         <div className="mt-1 space-y-1">
                           {entry.type === 'strength' ? (
@@ -340,8 +534,8 @@ const WorkoutAgendaPage: React.FC = () => {
                         </div>
                       </div>
                       <button
-                        onClick={() => {/* Delete entry */}}
-                        className="text-gray-400 hover:text-red-500 transition-colors"
+                        onClick={() => handleDeleteEntry(entry.id)}
+                        className="text-gray-400 hover:text-red-500 transition-colors ml-4"
                       >
                         <Trash2 size={18} />
                       </button>
